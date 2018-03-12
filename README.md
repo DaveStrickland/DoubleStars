@@ -59,9 +59,9 @@ a set of stellar names (either common names or catalog IDs),
 [fits](https://en.wikipedia.org/wiki/FITS)-format
 output tables that contain the following information:
 
-     Name        | In HTML?| unit     |               Description               
---- | --- | ---  | ---
-            Star | yes     |          |             User-supplied star object ID
+|     Name        | In HTML?| unit     |               Description |              
+| --- | --- | ---  | --- |
+|            Star | yes     |          |             User-supplied star object ID |
         SimbadID | yes     |          |                   Main ID used by Simbad
              WDS | yes     |          |        Washington Double Star Catalog ID
              SAO | yes     |          |                      SAO Star Catalog ID
