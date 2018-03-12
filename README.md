@@ -62,38 +62,38 @@ output tables that contain the following information:
 |     Name        | In HTML?| unit     |               Description |              
 | --- | --- | ---  | --- |
 |            Star | yes     |          |             User-supplied star object ID |
-        SimbadID | yes     |          |                   Main ID used by Simbad
-             WDS | yes     |          |        Washington Double Star Catalog ID
-             SAO | yes     |          |                      SAO Star Catalog ID
-             HIP | yes     |          |              Hipparcos Output Catalog ID
-            NAME | yes     |          |                              Common name
-              HD | yes     |          |                  Henry Draper Catalog ID
-         RA_icrs | yes     | "h:m:s"  |Right ascension, HMS, ICRS at J2000 epoch
-        DEC_icrs | yes     | "d:m:s"  |    Declination, DMS, ICRS at J2000 epoch
-     RA_icrs_deg | no      |     deg  |       Right ascension in decimal degrees
-    DEC_icrs_deg | no      |     deg  |           Declination in decimal degrees
-   RADEC_bibcode | no      |          |                  Bibcode for coordinates
-            magB | no      |     mag  |                V-band apparent magnitude
-        magB_err | no      |          | Uncertainty in B-band apparent magnitude
-    magB_bibcode | no      |          |    Bibcode for B-band apparent magnitude
-            magV | yes     |     mag  |                V-band apparent magnitude
-        magV_err | no      |          | Uncertainty in V-band apparent magnitude
-    magV_bibcode | no      |          |    Bibcode for V-band apparent magnitude
-        parallax | no      |     mas  |                                 parallax
-    parallax_err | no      |     mas  |                             parallax_err
-parallax_bibcode | no      |          |                     Bibcode for parallax
-           pm_RA | no      | mas / yr |                       Proper motion in RA
-          pm_DEC | no      | mas / yr |                      Proper motion in DEC
-     pm_err_maja | no      | mas / yr |            Proper motion error major axis
-     pm_err_mina | no      | mas / yr |            Proper motion error minor axis
-    pm_err_angle | no      | deg      |            Proper motion error angle
-      pm_bibcode | no      |          |                Bibcode for proper motion
-       spec_type | yes     |          | Spectral type including luminosity class
-       spec_qual | no      |          |                    Spectral type quality
-    spec_bibcode | no      |          |                Bibcode for spectral type
-     Teff_(Fe_H) | yes     | degK     |            Effective temperature in K
-       \[Fe/H\]  | yes     |          |   Metal abundance relative to Sun in dex
-    Fe_H_bibcode | no      |          |     Bibcode for metal abundance and Teff
+|        SimbadID | yes     |          |                   Main ID used by Simbad |
+|             WDS | yes     |          |        Washington Double Star Catalog ID |
+|             SAO | yes     |          |                      SAO Star Catalog ID |
+|             HIP | yes     |          |              Hipparcos Output Catalog ID |
+|            NAME | yes     |          |                              Common name |
+|              HD | yes     |          |                  Henry Draper Catalog ID |
+|         RA_icrs | yes     | "h:m:s"  |Right ascension, HMS, ICRS at J2000 epoch |
+|        DEC_icrs | yes     | "d:m:s"  |    Declination, DMS, ICRS at J2000 epoch |
+|     RA_icrs_deg | no      |     deg  |       Right ascension in decimal degrees |
+|    DEC_icrs_deg | no      |     deg  |           Declination in decimal degrees |
+|   RADEC_bibcode | no      |          |                  Bibcode for coordinates |
+|            magB | no      |     mag  |                V-band apparent magnitude |
+|        magB_err | no      |          | Uncertainty in B-band apparent magnitude |
+|    magB_bibcode | no      |          |    Bibcode for B-band apparent magnitude |
+|            magV | yes     |     mag  |                V-band apparent magnitude |
+|        magV_err | no      |          | Uncertainty in V-band apparent magnitude |
+|    magV_bibcode | no      |          |    Bibcode for V-band apparent magnitude |
+|        parallax | no      |     mas  |                                 parallax |
+|    parallax_err | no      |     mas  |                             parallax_err |
+|parallax_bibcode | no      |          |                     Bibcode for parallax |
+|           pm_RA | no      | mas / yr |                      Proper motion in RA |
+|          pm_DEC | no      | mas / yr |                     Proper motion in DEC |
+|     pm_err_maja | no      | mas / yr |           Proper motion error major axis |
+|     pm_err_mina | no      | mas / yr |           Proper motion error minor axis |
+|    pm_err_angle | no      | deg      |                Proper motion error angle |
+|      pm_bibcode | no      |          |                Bibcode for proper motion |
+|       spec_type | yes     |          | Spectral type including luminosity class |
+|       spec_qual | no      |          |                    Spectral type quality |
+|    spec_bibcode | no      |          |                Bibcode for spectral type |
+|     Teff_(Fe_H) | yes     | degK     |            Effective temperature in K |
+|       \[Fe/H\]  | yes     |          |   Metal abundance relative to Sun in dex |
+|    Fe_H_bibcode | no      |          |     Bibcode for metal abundance and Teff |
 
 All data items are written thhe gzipped fits table. Although some items are 
 left out of the HTML output by default they can be included using the `--fullhtml` command line flag.
