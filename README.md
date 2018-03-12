@@ -30,23 +30,23 @@ stellar radius, separation and distance of binary or multiple star
 systems. The code to do that will be added at a later date.
 
 The basic work flow is:
-0. Get a text format or HTML table format list of interesting objects.
+1. Get a text format or HTML table format list of interesting objects.
    The only required information is a column of names or identifiers
    that we can pass to Simbad. (Lets call this data "level 0".)
-1. Run `star_query.py` on that input to get first guess at recognized
+2. Run `star_query.py` on that input to get first guess at recognized
    Simbad identifiers for those targets, in particular WDS 
    (Washington Double Star) and HIP (Hipparcos Output Catalog) IDs.
    This will also get basic observable data such as positions,
    parallaxes, proper motions, spectral types and B and V-band
    magnitudes.
    (We'll call the output fits table from this stage "level 1").
-2. *(Not yet implemented)* Process the level 1 data to get Simbad ID's
+3. *(Not yet implemented)* Process the level 1 data to get Simbad ID's
    for the primary, secondary, etc, components of the multiple star
    systems.
-3. *(Not yet implemented)* Query Simbad with these new, more specific, IDs to get the observable
+4. *(Not yet implemented)* Query Simbad with these new, more specific, IDs to get the observable
    data for all selected multiple star components. (We'll call this
    "level 2".)
-4. *(Not yet implemented)* Process the level 2 data to derive physical
+5. *(Not yet implemented)* Process the level 2 data to derive physical
    properties of the stars, e.g. distance, instrinsic luminosity, 
    temperature, radius, and maybe ZAMs mass and lifetime, along with
    the physical separation of the binary/multiple star components.
@@ -60,7 +60,7 @@ a set of stellar names (either common names or catalog IDs),
 output tables that contain the following information:
 
      Name        | In HTML?| unit     |               Description               
----------------- |-------- |--------  | ---------------------------------------
+---------------- | ------- | -------  | ---------------------------------------
             Star | yes     |          |             User-supplied star object ID
         SimbadID | yes     |          |                   Main ID used by Simbad
              WDS | yes     |          |        Washington Double Star Catalog ID
