@@ -7,7 +7,7 @@
 - [X] Add license headers to double star code
 - [X] Finish output of modified table in HTML and fits
 - [X] Add SAO number to parsing
-- [ ] Create main github project
+- [X] Create main github project
 - [X] Create README.md
 - [X] Write README.md section on getting your own list working
 - [X] Fix default formatting of table columns
