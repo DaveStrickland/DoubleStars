@@ -60,7 +60,7 @@ a set of stellar names (either common names or catalog IDs),
 output tables that contain the following information:
 
      Name        | In HTML?| unit     |               Description               
----------------- | ------- | -------  | ---------------------------------------
+--- | --- | ---  | ---
             Star | yes     |          |             User-supplied star object ID
         SimbadID | yes     |          |                   Main ID used by Simbad
              WDS | yes     |          |        Washington Double Star Catalog ID
