@@ -1,0 +1,9 @@
+# One object per line, first non-commented line is Table column heading.
+Star
+alpha Ori
+beta Ori
+gamma Ori
+delta Ori
+Proxima Centauri
+Barnard's Star
+Lacaille 8760
