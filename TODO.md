@@ -27,12 +27,27 @@
 - [X] Check input column name handling works, handles errors well
 - [X] Add Fe_H Teff columns as its available
 
+## Version 0.2 - WDS Handling
+
+- [X] Script to download WDS data table directly from CDS.
+- [X] Python script to edit "bad" fits header keywords, e.g. in WDS.
+- [X] Python script to process output of star_query.py to get clean WDS IDs
+- [X] process_wds_ids to preserve user 'star' ID
+- [X] wds algorithm for selecting components
+- [X] Python script to parse WDS data to get simbad-acceptable multiple star IDs
+- [X] Modify SimbadStarQuery and star_query to allow alternate query ID.
+- [ ] When using alternate query ID rationalize multiple WDS to match query
+- [ ] When using alternate query ID log query id's that fail & target names
+- [ ] Move common command line options to DavesAstropyUtils
+- [X] Implement ABC filter
+- [X] Create generalized table writer in DavesAstropyUtils
+- [ ] Use generalized writer in star_query
+
 ## Future Versions
 
-- [ ] Script to download WDS data table directly from CDS.
-- [ ] Python script to edit "bad" fits header keywords, e.g. in WDS.
-- [ ] Python script to process output of star_query.py to get clean WDS IDs
-- [ ] Python script to parse WDS data to get multiples.
+- [ ] Ability to run all processing stages from one script.
+- [ ] Ability to get secondary component RA/DEC from WDS primary pos + offset/PA.
+- [ ] Environment variable for path to inputs like darkTable.css
 - [ ] Clean up existing python related to Prieto et al data.
 - [ ] Have configurable input/output column names, formats, descriptions
 - [ ] Make votable fields used configurable as part of input/output column name config
@@ -40,3 +55,6 @@
 - [ ] Full docstring and/or Sphinx documentation
 - [ ] Unit tests!
 - [ ] Possibly handle multiple distinct inputs, e.g. '42-45 Ori'
+- [ ] Ability to output open astronomy log format for use with kstars
+- [ ] Investigate GAIA coverage of targets.
+- [ ] Use GAIA data instead of Hipparcos, IF GAIA covers bright stars.

@@ -34,7 +34,7 @@ __date__ = "2018/02/23"
 __deprecated__ = False
 __email__ =  "dave.strickland@gmail.com"
 __license__ = "GPLv3"
-__version__ = "0.1"
+__version__ = "0.2.0"
 
 def fix_names(anInputStr):
     """Perform various fixed on star names from the web HTML tables.
@@ -61,6 +61,8 @@ def command_line_opts():
     p_css = 'darkTable.css'
     p_alias_file = 'simbad_star_alias.csv'
     p_namecol = 'Star'
+    p_stage2col = 'WDS'
+
     parser = argparse.ArgumentParser()
     # required command line arguments
     parser.add_argument(dest='input_file', metavar=p_ihtml,
@@ -76,7 +78,10 @@ def command_line_opts():
         help='Optional outputted \"pretty\" version of input HTML table that uses the CSS table style for output HTML')
     parser.add_argument('-c', '--col', 
         dest='namecol', default=p_namecol, metavar='colname',
-        help='Name of table column containg star name/identifier (default: {})'.format(p_namecol))
+        help='Name of the table column containing primary target star name/identifier (default: {})'.format(p_namecol)+
+        ' In the default (aka primary stage) processing the targets are listed by the name in this'+
+        ' column and the Simbad search uses this identifier (or the alternative from'+
+        ' the "aliases" file).')
     parser.add_argument('--fullhtml', 
         dest='fullhtml', action='store_true', 
         help='Output all data fields used for the fits output to the summary HTML file. By default bibcode, errors, parallax and proper motion are excluded from the summary HTML.')
@@ -86,6 +91,18 @@ def command_line_opts():
     parser.add_argument('--aliases',
         dest='star_alias_file', default=p_alias_file, metavar='ALIASES.csv',
         help='CSV file containing mapping between user-supplied star names and names acceptable to Simbad (default: {})'.format(p_alias_file))
+
+    parser.add_argument('--stage2',
+        dest='stage2', action='store_true', default=False,
+        help='Activate secondary stage processing.'+
+            ' This should only by performed on inputs that have WDS components identified.'+
+            ' In secondary stage processing targets are still listed with respect to the'+
+            ' user ID in the "colname" table column, but the Simbad searches'+
+            ' are made using identifiers in the "stage2col" table column instead.')
+    parser.add_argument('--stage2col', 
+        dest='stage2col', default=p_stage2col, metavar='stage2col',
+        help='Name of the table column containing identifier used for each target in stage2 processing (default: {})'.format(p_stage2col))
+
     parser.add_argument('-v', '--verbose',
         dest='verbose', action='store_true',
         help='Verbose output for each object processed. Useful for debugging purposes.')
@@ -112,6 +129,10 @@ def main():
         print('Output pretty HTML version of input file: {}'.format(p_args.pretty))
     print('Output processed data table (FITS): {}'.format(p_args.otable))
     print('Output summary of processed data (HTML): {}'.format(p_args.ohtml))
+    if p_args.stage2:
+        print('Stage 2 processing of WDS sub-components for each user target is enabled.')
+    else:
+        print('Stage 1 processing of user specified target.')
 
     # Read in the original HTML or TXT star list into a table for processing
     p_data = dapu.read_table(p_ifile)
@@ -120,15 +141,20 @@ def main():
 
     # Check the column with the star names/identifiers exists
     if not p_args.namecol in p_data.colnames:
-        print('Error: Identifier column name "{}" not found in {} data'.format(p_args.namecol, p_ifile))
+        print('Error: Target ID column name "{}" not found in {} data'.format(p_args.namecol, p_ifile))
         print('  Did you mean "{}" instead?'.format(p_data.colnames[0]))
         print('  Use "--col colname" to specifiy the correct column name on the command line')
         sys.exit(1)
+    if p_args.stage2:
+        if not p_args.stage2col in p_data.colnames:
+            print('Error: Identifier column name "{}" not found in {} data'.format(p_args.namecol, p_ifile))
+            sys.exit(2)
 
     print('About to process {} stars from {}'.format(len(p_data), p_ifile))
     p_otable = None
-    p_ofail_list = None
-    [p_otable, p_ofail_list] = do_astroquery(p_args, p_data, bad_names_dict)
+    p_ofail_list = None # user object name fail list
+    p_qfail_list = None # actual query names that failed
+    [p_otable, p_ofail_list, p_qfail_list] = do_astroquery(p_args, p_data, bad_names_dict)
 
     # to replace missing data with a fill value.
     # NOTE: Doesn't quite work as not all missing values are identified
@@ -166,7 +192,8 @@ def main():
         print('Queries failed for the following {} object names.'.format(len(p_ofail_list)))
         print('  Please check these using http://simbad.u-strasbg.fr/simbad/sim-fid OR')
         print('  using http://simbad.u-strasbg.fr/simbad/sim-fcoo')
-        print('  Failed objects: {}'.format(p_ofail_list))
+        print('  Failed objects, user-input target names: {}'.format(p_ofail_list))
+        print('  Failed objects, Simbad query IDs used:   {}'.format(p_qfail_list))
     return
     
 
@@ -176,35 +203,47 @@ def do_astroquery(p_args, p_data, p_alias_dict):
     # Initialize the class that does the queries and formats the tables.
     sid = SimbadStarQuery(p_alias_dict)
     p_otable = None
-    p_fail_list=[]
+    p_fail_obj_list = [] # list of input target names
+    p_fail_qry_list = [] # list of actual query names used
     p_object_num = -1
     for row in p_data:
         p_object_num = p_object_num + 1
         star_name = fix_names(row[p_args.namecol])
-        print('Processing {}'.format(star_name))
-        sid.do_query(star_name)
+        if p_args.stage2:
+            # extract the alternate ID used for simbad referencing
+            query_name = ' '.join([p_args.stage2col, row[p_args.stage2col]])
+            print('Processing {} with query ID {}'.format(star_name, query_name))
+        else:
+            # just use user target ID to identify object and search simbad
+            print('Processing {}'.format(star_name))
+            query_name = star_name
+
+        sid.do_query(star_name, query_name)
         if not sid.successfully_queried:
             print('  Warning: Simbad.query_object fails for {}'.format(star_name))
-            p_fail_list.append(star_name)
+            p_fail_obj_list.append(star_name)
+            p_fail_qry_list.append(sid.query_id)
             continue
 
         num_rows = sid.num_rows_returned
         if (num_rows == 0):
             print('  Warning: No rows returns from Simbad.query_object for {}'.format(star_name))
-            p_fail_list.append(star_name)
+            p_fail_obj_list.append(star_name)
+            p_fail_qry_list.append(sid.query_id)
             continue
         elif (num_rows > 1):
             print('  Warning: {:d} rows returned from Simbad.query_object for {}'.format(num_rows, star_name))
-            p_fail_list.append(star_name)
+            p_fail_obj_list.append(star_name)
+            p_fail_qry_list.append(sid.query_id)
             continue
         
 
         # Define the output table structure based on content on simbad object
         if p_otable is None:
             p_otable = sid.get_table()
-            ##if p_args.verbose:
-            ##    print('  Initial table:\n',
-            ##        p_otable)
+            if p_args.verbose:
+                print('  Initial table:\n',
+                    p_otable.colnames)
 
         else:
             # Add row data existing table
@@ -216,7 +255,7 @@ def do_astroquery(p_args, p_data, p_alias_dict):
 
     if p_args.verbose:
         print(p_otable)
-    return p_otable, p_fail_list
+    return p_otable, p_fail_obj_list, p_fail_qry_list
     
 if __name__ == "__main__":
     main()

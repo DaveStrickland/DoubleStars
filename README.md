@@ -1,7 +1,7 @@
-# DoubleStars README
+# DoubleStars Version 0.2.alpha README
 
 Extracts the latest astronomical information for a list 
-of stellar objects, in particular double stars.
+of stellar objects, in particular double/multiple stellar systems.
 
 ## Introduction
 
@@ -39,21 +39,32 @@ The basic work flow is:
    This will also get basic observable data such as positions,
    parallaxes, proper motions, spectral types and B and V-band
    magnitudes.
-   (We'll call the output fits table from this stage "level 1").
-3. *(Not yet implemented)* Process the level 1 data to get Simbad ID's
+   We'll call the output fits table from this stage "level 1".
+   If you're just running it to get information on some arbitrary stars
+   without an interest in known double/multiple star systems then you
+   can skip ahead to step 5.
+3. Run `process_wds_ids.py` on the level 1 data to get Simbad ID's
    for the primary, secondary, etc, components of the multiple star
-   systems.
-4. *(Not yet implemented)* Query Simbad with these new, more specific, IDs to get the observable
-   data for all selected multiple star components. (We'll call this
-   "level 2".)
+   systems. (Only needed when you're interested in double/multiple star
+   systems.)
+4. Re-run `star_query.py` on the outut of step #3, using 
+   the new, more specific, IDs to get the observable
+   data for all selected multiple star components. We'll call this
+   "level 2". (Only needed when you're interested in double/multiple star
+   systems.)
 5. *(Not yet implemented)* Process the level 2 data to derive physical
    properties of the stars, e.g. distance, instrinsic luminosity, 
    temperature, radius, and maybe ZAMs mass and lifetime, along with
    the physical separation of the binary/multiple star components.
    
-### star_query.py
+### Script Overview
 
-Given an input HTML table or text file containing
+The following subsections provide an overview of the scripts. More detailed
+usage information is provided in the Usage section later in this document.
+
+#### star_query.py
+
+Given an input HTML table, FITS table, or text file containing
 a set of stellar names (either common names or catalog IDs), 
 `star_query.py` can be run to produce HTML and gzipped 
 [fits](https://en.wikipedia.org/wiki/FITS)-format
@@ -68,8 +79,8 @@ output tables that contain the following information:
 |             HIP | yes     |          |              Hipparcos Output Catalog ID |
 |            NAME | yes     |          |                              Common name |
 |              HD | yes     |          |                  Henry Draper Catalog ID |
-|         RA_icrs | yes     | "h:m:s"  |Right ascension, HMS, ICRS at J2000 epoch |
-|        DEC_icrs | yes     | "d:m:s"  |    Declination, DMS, ICRS at J2000 epoch |
+|         RA_icrs | yes     | hrs:min:sec | Right ascension, HMS, ICRS at J2000 epoch |
+|        DEC_icrs | yes     | deg:min:sec |    Declination, DMS, ICRS at J2000 epoch |
 |     RA_icrs_deg | no      |     deg  |       Right ascension in decimal degrees |
 |    DEC_icrs_deg | no      |     deg  |           Declination in decimal degrees |
 |   RADEC_bibcode | no      |          |                  Bibcode for coordinates |
@@ -96,8 +107,25 @@ output tables that contain the following information:
 |    Fe_H_bibcode | no      |          |     Bibcode for metal abundance and Teff |
 
 All data items are written thhe gzipped fits table. Although some items are 
-left out of the HTML output by default they can be included using the `--fullhtml` command line flag.
+left out of the HTML output by default they can be included using the 
+`--fullhtml` command line flag.
 
+### process_wds_ids.py
+
+Extracts a clean list of Washington Double Star (WDS) IDs from the initial FITS-dormat output
+of star_query.py. The script then combines that with the information on all listed
+(likely and unlikely) companions from the main WDS data file to generate a 
+list of likely stellar companions using one of several different filtering
+methods.
+
+The output table produced by `process_wds_ids.py` can then be fed back into
+`star_query.py` as input along with the `--stage2` command line flag.
+
+A separate bash script, `download_data.sh`, should be used before running `process_wds_ids.py`.
+The bash script will download the main WDS data table needed by process_wds_ids.py`
+from CDS. (It also uses `fitsmodhead.py` to fix a FITS header keyword 
+problem in the WDS data table that would otherwise prevent astropy.io.fits from
+reading the WDS data.)
 
 ## Inputs
 
@@ -210,14 +238,17 @@ installing a similar set of dependencies should get it working.
 
 ## Usage
 
+### star_query.py usage
+
 Run `star_query.py` with `-h` or `--help` to get the command line usage.
 Example input files are provided as part of this package.
 
 ```
-[dks@ithaqua DoubleStars]$ python3 star_query.py --help
-usage: star_query.py [-h] [-p pretty_input_version.html] [-c name]
+tsathoggua 07:33:32 DoubleStars> python3 star_query.py --help
+usage: star_query.py [-h] [-p pretty_input_version.html] [-c colname]
                      [--fullhtml] [--css table_style.css]
-                     [--aliases ALIASES.csv] [-v]
+                     [--aliases ALIASES.csv] [--stage2]
+                     [--stage2col stage2col] [-v]
                      input_file_or_txt output_summary.html output.fits.gz
 
 positional arguments:
@@ -231,8 +262,13 @@ optional arguments:
   -p pretty_input_version.html, --pretty pretty_input_version.html
                         Optional outputted "pretty" version of input HTML
                         table that uses the CSS table style for output HTML
-  -c name, --col name   Name of table column containg star name/identifier
-                        (default: Star)
+  -c colname, --col colname
+                        Name of the table column containing primary target
+                        star name/identifier (default: Star) In the default
+                        (aka primary stage) processing the targets are listed
+                        by the name in this column and the Simbad search uses
+                        this identifier (or the alternative from the "aliases"
+                        file).
   --fullhtml            Output all data fields used for the fits output to the
                         summary HTML file. By default bibcode, errors,
                         parallax and proper motion are excluded from the
@@ -244,8 +280,19 @@ optional arguments:
                         CSV file containing mapping between user-supplied star
                         names and names acceptable to Simbad (default:
                         simbad_star_alias.csv)
+  --stage2              Activate secondary stage processing. This should only
+                        by performed on inputs that have WDS components
+                        identified. In secondary stage processing targets are
+                        still listed with respect to the user ID in the
+                        "colname" table column, but the Simbad searches are
+                        made using identifiers in the "stage2col" table column
+                        instead.
+  --stage2col stage2col
+                        Name of the table column containing identifier used
+                        for each target in stage2 processing (default: WDS)
   -v, --verbose         Verbose output for each object processed. Useful for
                         debugging purposes.
+
 ```
 
 An example of running the code using a list of stars from [Bob King's
@@ -361,6 +408,112 @@ parallax_bibcode   str24                                       Bibcode for paral
 Wrote formatted table to king_processed_summary.html using CSS style darkTable
 
 ```
+
+### process_wds_ids.py usage
+
+Before running `process_wds_ids.py` for the first time you should run `download_data.sh`
+to download and fix the WDS data file it needs. This only needs to be done once, e.g:
+
+```
+tsathoggua 07:38:07 DoubleStars> bash download_data.sh 
+DOUBLE_STARS environment variable not set. Using ./
+Using existing base data directory: .//Data
+Setting up WDS data
+  Using existing directory: .//Data/WDS
+  About to download 4 files.
+  Downloading ReadMe.WDS
+  Downloading B_wds.fits.gz
+  Downloading B_wds_refs.fits.gz
+  Downloading B_wds_notes.fits.gz
+NB: Using fitsmodhead.py to fix B_wds.fits.gz EPOCH
+Original keyword=EPOCH value=2000,.
+Updated keyword=EPOCH value=2000
+```
+
+`process_wds_ids.py` has the following options:
+```
+tsathoggua 07:37:41 DoubleStars> python3 process_wds_ids.py --help
+usage: process_wds_ids.py [-h] [--wds-detail wds_detail.html]
+                          [--css table_style.css] [-w WDSFILE]
+                          [--filter FILTER] [--magdiff MAGDIFF] [-v]
+                          INPUT_STAR_QUERY_OUTPUT.fits OUT_TABLE
+
+positional arguments:
+  INPUT_STAR_QUERY_OUTPUT.fits
+                        Fits table that was generated by star_query.py
+  OUT_TABLE             Name for table of processed targets with their WDS
+                        identifiers. Format is determined from file name.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --wds-detail wds_detail.html
+                        Name for optional output of WDS informational data on
+                        processed WDS components that passed filtering. Format
+                        is determined from file name.
+  --css table_style.css
+                        CSS table style for output HTML (default:
+                        darkTable.css)
+  -w WDSFILE, --wdsfile WDSFILE
+                        Location of WDS data table. (default:
+                        Data/WDS/B_wds.fits.gz)
+  --filter FILTER       Type of binary star filtering to apply. Valid entries
+                        are "abc", "negative", or "positive" (default:
+                        negative) "abc" selects A, B and C components.
+                        "positive" selects only physically likely companions.
+                        "negative" deselects unphysical components and
+                        components with large magnitude differences.
+  --magdiff MAGDIFF     Maximum magnitude difference allowed in negative
+                        filter (default: 6.0)
+  -v, --verbose         Verbose output for each object processed. Useful for
+                        debugging purposes.
+```
+
+An example of using `process_wds_ids.py` with the "positive" filter is shown below.
+This also writes some additional information extracted from the WDS data to a separate
+HTML format table with a name defined by the `--wds-detail` command line parameter.
+```
+tsathoggua 14:20:36 DoubleStars> python3 process_wds_ids.py king_processed.fits.gz king_wds_postv_ids.html --wds-detail=king_wds_postv_detail.html  --filter=positive
+Processing 22 targets from king_processed.fits.gz
+  Target #0 eta Cas obtained WDS-like ID 00491+5749 from J00491+5749AB
+  Target #1 1 Ari obtained WDS-like ID 01501+2217 from J01501+2217AB
+    Target #1 1 Ari has no likely WDS components after filtering
+  Target #2 gamma And obtained WDS-like ID 02039+4220 from J02039+4220A,BC
+  Target #3 iota Tri = 6 Tri obtained WDS-like ID 02124+3018 from J02124+3018AB
+    Target #3 iota Tri = 6 Tri has no likely WDS components after filtering
+  Target #4 eta Per obtained WDS-like ID 02507+5554 from J02507+5554A
+    Target #4 eta Per has no likely WDS components after filtering
+  Target #5 32 Eri obtained WDS-like ID 03543-0257 from J03543-0257AB
+    Target #5 32 Eri has no likely WDS components after filtering
+  Target #6 rho Ori obtained WDS-like ID 05133+0252 from J05133+0252AB
+    Target #6 rho Ori has no likely WDS components after filtering
+  Target #7 14 Aur obtained WDS-like ID 05154+3241 from J05154+3241A
+  Target #8 iota Ori obtained WDS-like ID 05354-0555 from J05354-0555A
+    Target #8 iota Ori has no likely WDS components after filtering
+  Target #9 gamma Lep obtained WDS-like ID 05445-2227 from J05445-2227A
+    Target #9 gamma Lep has no likely WDS components after filtering
+  Target #10 h3945 CMa obtained WDS-like ID 07166-2319 from J07166-2319A
+  Target #11 iota Cnc obtained WDS-like ID 08467+2846 from J08467+2846A
+  Target #12 24 Com obtained WDS-like ID 12351+1823 from J12351+1823A
+    Target #12 24 Com has no likely WDS components after filtering
+  Target #13 xi Boo obtained WDS-like ID 14514+1906 from J14514+1906AB
+  Target #14 alpha Her obtained WDS-like ID 17146+1423 from J17146+1423AB
+  Target #15 95 Her obtained WDS-like ID 18015+2136 from J18015+2136AB
+  Target #16 zeta Lyr obtained WDS-like ID 18448+3736 from J18448+3736A
+  Target #17 Albireo obtained WDS-like ID 19307+2758 from J19307+2758A
+  Target #18 31 Cyg obtained WDS-like ID 20136+4644 from J20136+4644Aa,Ab
+  Target #19 beta Cap obtained WDS-like ID 20210-1447 from J20210-1447AB
+  Target #20 gamma Del obtained WDS-like ID 20467+1607 from J20467+1607AB
+  Target #21 delta Cep obtained WDS-like ID 22292+5825 from J22292+5825A
+Found WDS IDs for 14 input targets, skipped 8
+Wrote formatted table to king_wds_postv_ids.html using CSS style darkTable
+Wrote filtered WDS component for input targets to king_wds_postv_ids.html
+Wrote formatted table to king_wds_postv_detail.html using CSS style darkTable
+Wrote WDS component detail info to king_wds_postv_detail.html
+Information on targets with no WDS or all WDS components filtered out.
+  0 input targets with no WDS info: []
+  8 input targets where positive filtering removed all components: ['1 Ari', 'iota Tri = 6 Tri', 'eta Per', '32 Eri', 'rho Ori', 'iota Ori', 'gamma Lep', '24 Com']
+```
+
 
 ## Other Useful Info
 

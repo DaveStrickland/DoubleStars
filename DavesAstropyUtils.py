@@ -22,7 +22,7 @@ __date__ = "2018/02/23"
 __deprecated__ = False
 __email__ =  "dave.strickland@gmail.com"
 __license__ = "GPLv3"
-__version__ = "0.1"
+__version__ = "0.2.0"
 
 def convert_greek_unicode_symbol(anInputStr):
     """Replaces unicode greek symbols with the ASCII textual name 
@@ -126,12 +126,17 @@ def read_table(input_file, p_verbose=False):
             p_data = read_ascii(input_file, p_verbose)
         elif 'html' in input_file:
             p_data = read_html(input_file, p_verbose)
+        elif 'fits' in input_file:
+            p_data = read_fits(input_file, p_verbose)
         else:
             print('Error: Unexpected file format for input file {}'.format(input_file))
             sys.exit(1)
     except:
         print('Error: Failed to correctly read {}'.format(input_file))
         sys.exit(2)
+    
+    if p_verbose:
+        print('Read {} row tables from {}'.format(len(p_data), input_file))
     return p_data
 
 def read_ascii(input_txt_file, p_verbose=False):
@@ -162,9 +167,43 @@ def read_html(input_html_table, p_verbose=False):
         print(p_data.info)
     return p_data
 
-def write_to_html(atable, an_output_file, a_css_style='darkTable.css'):
+def read_fits(input_html_table, p_verbose=False):
+    """Reads data from a FITS or gzipped FITS file, returning an astropy Tables object"""
+    from astropy.table import Table
+    if p_verbose:
+        print('Reading data table from {}'.format(input_html_table))
+    p_data = Table.read(input_html_table, 
+        format='fits')
+    if p_verbose:
+        print(p_data.info)
+    return p_data
+
+def write_table(atable, an_output_file, a_css_style):
+    """Writes the astropy Table to disk using a format determined
+    from the file name itself.
+    """
+    if '.fits' in an_output_file:
+        write_to_fits(atable, an_output_file)
+    elif '.html' in an_output_file:
+        write_to_html(atable, an_output_file, a_css_style)
+    else:
+        print('Error: Unexpected file format for output table')
+        print('  File name: {}'.format(an_output_file))
+        print('  Expecting file name suffix to include either "fits" or "html"')
+        print('  Nothing will be written now...')
+    return
+
+def write_to_fits(atable, an_output_file):
+    """Write an astropy table to a fits file
+    """
+    atable.write(an_output_file, format='fits', overwrite=True)
+    return
+
+def write_to_html(atable, an_output_file, a_css_style=None):
     """Writes out an astropy Table to HTML while applying a CSS style to it."""
     from astropy.table import Table
+    if a_css_style is None:
+        a_css_style = 'darkTable.css'
     # This reads the css and applies it within the table
     with open(a_css_style, 'r') as css_file:
        p_css_str = css_file.read() 

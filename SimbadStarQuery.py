@@ -28,7 +28,7 @@ __date__ = "2018/02/23"
 __deprecated__ = False
 __email__ =  "dave.strickland@gmail.com"
 __license__ = "GPLv3"
-__version__ = "0.1"
+__version__ = "0.2.0"
 
 class SimbadStarQuery:
     """Queries Simbad for information about a stellar object,
@@ -161,10 +161,17 @@ class SimbadStarQuery:
             result_table['MAIN_ID'][0] = result_table['MAIN_ID'][0].replace('NAME ', '')
         return
         
-    def do_query(self, user_ident):
-        """Queries Simbad for the user-supplied object and processes the
-        output.
+    def do_query(self, user_ident, query_id=None):
+        """Queries Simbad for the user-supplied target object,
+        using that an optional ID for the Simbad query, and processes 
+        the resulting astropy table output.
         """
+        if query_id is None:
+            # Use user_ident as the query id
+            self.query_id = user_ident
+        else:
+            self.query_id = query_id
+
         # Reset some stuff.
         self.successfully_queried = False
         self.num_rows_returned = 0
@@ -172,12 +179,12 @@ class SimbadStarQuery:
 
         # Turn non-Simbad compliant IDs into ones acceptable to Simbad
         self.user_ident = user_ident
-        self.simbad_object_id = self.get_simbad_object_id(self.user_ident,
+        self.simbad_object_id = self.get_simbad_object_id(self.query_id,
             self.simbad_alias_dict)
         
         # Query Simbad and make sure we get one (1) row returned
         result_table = Simbad.query_object(self.simbad_object_id)
-
+ 
         # check what we've got back
         if result_table is None:
             return
@@ -309,11 +316,21 @@ class SimbadStarQuery:
     
             # check how many results we've got
             if len(p_identifier_list) > 1:
+                p_choice = None
                 # Treatment depends on type of identifier
                 if identifier in 'WDS':
-                    # choose shortest string. Note list osrt returns none, its inplace
-                    p_identifier_list.sort(key=len)
-                    p_choice = p_identifier_list[0]
+                    # choose shortest string unless that WDS is the
+                    # actual query. 
+                    if 'WDS' in self.query_id:
+                        for wds_item in p_identifier_list:
+                            if wds_item in self.query_id:
+                                # Matches input query, so choose that
+                                p_choice = wds_item
+                    if p_choice is None:
+                        # Do this only if we haven't found a match yet
+                        # Note list sort returns none, its inplace
+                        p_identifier_list.sort(key=len)
+                        p_choice = p_identifier_list[0]
                 else:
                     # simply take first
                     p_choice = p_identifier_list[0]
