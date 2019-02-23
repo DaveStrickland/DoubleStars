@@ -38,22 +38,25 @@
 - [X] Modify SimbadStarQuery and star_query to allow alternate query ID.
 - [ ] When using alternate query ID rationalize multiple WDS to match query
 - [ ] When using alternate query ID log query id's that fail & target names
-- [ ] Move common command line options to DavesAstropyUtils
 - [X] Implement ABC filter
 - [X] Create generalized table writer in DavesAstropyUtils
 - [ ] Use generalized writer in star_query
 
-## Future Versions
+## Version 0.3 - Physical Properties
 
+## Features Not Yet Assigned To A Version
+
+- [ ] Restructure as python package
+- [ ] Make scripts thin wrappers around python package
 - [ ] Ability to run all processing stages from one script.
+- [ ] Better PEP8 compliance
+- [ ] Full docstring and/or Sphinx documentation
+- [ ] Unit tests!
 - [ ] Ability to get secondary component RA/DEC from WDS primary pos + offset/PA.
 - [ ] Environment variable for path to inputs like darkTable.css
 - [ ] Clean up existing python related to Prieto et al data.
 - [ ] Have configurable input/output column names, formats, descriptions
 - [ ] Make votable fields used configurable as part of input/output column name config
-- [ ] Better PEP8 compliance
-- [ ] Full docstring and/or Sphinx documentation
-- [ ] Unit tests!
 - [ ] Possibly handle multiple distinct inputs, e.g. '42-45 Ori'
 - [ ] Ability to output open astronomy log format for use with kstars
 - [ ] Investigate GAIA coverage of targets.
