@@ -69,8 +69,7 @@ optional arguments:
 
 ```
 
-### Querying Simbad
-
+### Query Simbad using star_query
 
 In this case we're using the HTML table extracted from that article (slightly
 editted to remove some HTML table complexities that astropy can't handle).
@@ -184,7 +183,7 @@ Wrote formatted table to king_processed_summary.html using CSS style darkTable
 
 ```
 
-Note that `king_processed.fitz.gz` is the full set of output data, while
+Note that `king_processed.fits.gz` is the full set of output data, while
 `king_processed_summary.html` is a subset of that data that is easier
 for humans to view.
 
@@ -214,7 +213,7 @@ Updated keyword=EPOCH value=2000
 
 `process_wds_ids.py` has the following options:
 ```bash
-& python3 process_wds_ids.py --help
+$ python3 process_wds_ids.py --help
 usage: process_wds_ids.py [-h] [--wds-detail wds_detail.html]
                           [--css table_style.css] [-w WDSFILE]
                           [--filter FILTER] [--magdiff MAGDIFF] [-v]
@@ -302,9 +301,17 @@ Information on targets with no WDS or all WDS components filtered out.
 
 ## Step 3: Rerun star_query
 
+Now we have WDS IDs for each companion star we believe is a truly part
+of the multiple star system. This allows us to query Simbad for the 
+observed properties of those stars in additional to the primary.
+
 TBA
 
 ## Step 4: Calculate physical properties using XXX
+
+Now we process the observed properties (magnitudes, parallax, etc) 
+using a little bit of basic astrophysics to derive the physical 
+properties (luminosities, radii, distance, surface temperatures, etc).
 
 TBA
 
