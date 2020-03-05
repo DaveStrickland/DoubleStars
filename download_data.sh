@@ -5,7 +5,10 @@
 # Downloads data tables needed for DoubleStars from CDS VizieR
 # in gzipped fits format.
 #
-# Dave Strickland <dave.strickland@gmail.com> Mar 13, 2018 v0.1.1
+# @author Dave Strickland <dave.strickland@gmail.com>
+#
+# @history 2018-03-13 dks : Initial version coded.
+# @history 2020-03-05 dks : Reformat history and author tags.
 #-----------------------------------------------------------------------
 #
 
