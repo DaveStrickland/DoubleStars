@@ -1,5 +1,15 @@
 # DoubleStars Examples
 
+## Setting Up
+
+### DOUBLE_STARS Environment Variable
+
+TBA
+
+### Download WDS Data
+
+TBA
+
 ## Bob King's Colored Double Stars
 
 An example of running the code using a list of stars from [Bob King's

@@ -66,7 +66,8 @@ King's "Colored Doubles":
 ### Script Overview
 
 The following subsections provide an overview of the scripts. More detailed
-usage information is provided in the Usage section later in this document.
+usage information is provided in the [EXAMPLES.md](examples/EXAMPLES.md) 
+document.
 
 #### star_query.py
 
