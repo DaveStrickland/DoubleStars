@@ -2,7 +2,7 @@
 
 ## Setting Up
 
-### DOUBLE_STARS Environment Variable
+### Set DOUBLE_STARS Environment Variable
 
 TBA
 

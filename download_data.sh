@@ -24,7 +24,7 @@ fi
 if [ -z "$DOUBLE_STARS" ]; then
     echo "Warning: DOUBLE_STARS environment variable not set. Using ./"
     p_basedir=./
-    echo "  You need to set DOUBLE_STARS for the scripts to work properly."
+    echo "  You need to set DOUBLE_STARS for the python scripts to work properly."
 else
     p_basedir=$DOUBLE_STARS
 fi
@@ -39,6 +39,10 @@ p_wds_urls=("http://cdsarc.u-strasbg.fr/vizier/ftp/cats/B/wds/ReadMe" \
     "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B%2Fwds/wds.dat.gz" \
     "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B%2Fwds/refs.dat.gz" \
     "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B%2Fwds/notes.dat.gz" )
+
+# Do we try to fix the header of B_wds.fits.gz?
+# We can disable this by setting p_fix_hdr=0
+p_fix_hdr=0
 
 # current directory
 p_odir=$(pwd)
@@ -86,12 +90,17 @@ while [ $ifile -lt $nfiles ]; do
     sleep 2
     ((ifile++))
 done
-# Must fix/update B_wds.fits.gz header.
-if [ -e $p_fmod ]; then
-    echo "NB: Using $p_fmod to fix B_wds.fits.gz EPOCH"
-    python3 $p_fmod ./B_wds.fits.gz EPOCH 2000
+
+# Can try to fix/update B_wds.fits.gz header.
+if [ $p_fix_hdr -eq 1 ]; then
+    if [ -e $p_fmod ]; then
+        echo "NB: Using $p_fmod to fix B_wds.fits.gz EPOCH"
+        python3 $p_fmod ./B_wds.fits.gz EPOCH 2000
+    else
+        echo "Warning: $p_fmod not found. Cannot fix B_wds.fits.gz EPOCH"
+    fi
 else
-    echo "Warning: $p_fmod not found. Cannot fix B_wds.fits.gz EPOCH"
+    echo "Not attempting to fix B_wds_fits.gz EPOCH keyword. YMMV."
 fi
 cd $p_odir
 

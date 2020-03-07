@@ -58,7 +58,7 @@ def command_line_opts():
     p_phtml = 'pretty_input_version.html'
     p_ohtml = 'output_summary.html'
     p_otable = 'output.fits.gz'
-    p_css = 'darkTable.css'
+    p_css = '$DOUBLE_STARS/Data/darkTable.css'
     p_alias_file = 'simbad_star_alias.csv'
     p_namecol = 'Star'
     p_stage2col = 'WDS'

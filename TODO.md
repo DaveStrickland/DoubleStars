@@ -44,6 +44,8 @@
 - [ ] Use generalized writer in star_query
 - [ ] Add examples in docs
 - [ ] Resolve which existing TODOs are OBE.
+- [ ] BUG: fitsmodhead not working on B_wds.fits.gz (Seems like astropy problem)
+- [ ] BUG: try older version of WDS data files?
 
 ## Version 0.3 - Inferred Physical Properties
 

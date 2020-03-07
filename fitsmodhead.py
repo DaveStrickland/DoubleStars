@@ -68,18 +68,19 @@ def main():
     # has to be called on close() in order to fix non-compliant
     # fits files, even though verifying the headers fixes it in the
     # 'in memory' headers.
-    hdu_list = fits.open(p_args.fitsfile, mode='update')
+    hdu_list = fits.open(p_args.fitsfile, 
+        mode='update')
     if p_args.verbose:
         print('Structure of {} follows:'.format(p_args.fitsfile))
         print(hdu_list.info())
 
-    for hdu in hdu_list:
-        hdu.verify('silentfix+ignore')
-        if p_args.keyword in hdu.header:
-            hdr = hdu.header
-            print('Original keyword={} value={}'.format(p_args.keyword, hdr[p_args.keyword]))
-            hdr[p_args.keyword] = p_args.value
-            print('Updated keyword={} value={}'.format(p_args.keyword, hdr[p_args.keyword]))
+    # for hdu in hdu_list:
+        # hdu.verify('silentfix+ignore')
+        # if p_args.keyword in hdu.header:
+            # hdr = hdu.header
+            # print('Original keyword={} value={}'.format(p_args.keyword, hdr[p_args.keyword]))
+            # hdr[p_args.keyword] = p_args.value
+            # print('Updated keyword={} value={}'.format(p_args.keyword, hdr[p_args.keyword]))
         
     hdu_list.close(output_verify='silentfix+ignore')
     return
