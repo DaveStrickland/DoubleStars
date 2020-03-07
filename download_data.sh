@@ -9,17 +9,27 @@
 #
 # @history 2018-03-13 dks : Initial version coded.
 # @history 2020-03-05 dks : Reformat history and author tags.
+# @history 2020-03-06 dks : Add a .gitignore to $p_data_dir
 #-----------------------------------------------------------------------
 #
 
+# Check that wget is available
+which wget >& /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: wget is not installed or in your path."
+    exit 1
+fi 
+
+# Check DOUBLE_STARS is defined, but work around it not being set...
 if [ -z "$DOUBLE_STARS" ]; then
-    echo "DOUBLE_STARS environment variable not set. Using ./"
+    echo "Warning: DOUBLE_STARS environment variable not set. Using ./"
     p_basedir=./
+    echo "  You need to set DOUBLE_STARS for the scripts to work properly."
 else
     p_basedir=$DOUBLE_STARS
 fi
 
-p_data_dir=$p_basedir/Data
+p_data_dir=$p_basedir/data
 p_wds_dir=$p_data_dir'/WDS'
 p_wds_fnames=("ReadMe.WDS" \
     "B_wds.fits.gz" \
@@ -37,6 +47,12 @@ p_fmod=$p_odir/fitsmodhead.py
 if [ ! -d $p_data_dir ]; then
     echo "Creating base data directory: $p_data_dir"
     mkdir -p $p_data_dir
+    # Create a .gitignore in $p_data_dir if we've just created it
+    # to avoid WDS data getting added to the repo.
+    cat << EOF > $p_data_dir/.gitignore
+# Ignore the following directories
+WDS
+EOF
 else
     echo "Using existing base data directory: $p_data_dir"
 fi
