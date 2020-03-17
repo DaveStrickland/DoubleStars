@@ -20,6 +20,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi 
 
+# See if fverify is present (part of HEASOFT).
+which fverify >& /dev/null
+if [ $? -eq 0 ]; then
+    p_verify=$(which fverify)
+fi 
+
+
 # Check DOUBLE_STARS is defined, but work around it not being set...
 if [ -z "$DOUBLE_STARS" ]; then
     echo "Warning: DOUBLE_STARS environment variable not set. Using ./"
@@ -84,6 +91,25 @@ while [ $ifile -lt $nfiles ]; do
         --limit-rate=1m
     if [ ! -e $p_file ]; then
         echo " Error: failed to download $p_file"
+    else
+        if [ $(echo $p_file | grep -c fits) -gt 0 ]; then
+            # If fverify is present, attempt to verify any fits file.
+            if [ ! -z "$p_verify" ]; then
+                echo "    Verifying FITS compliance with fverify..."
+                p_tmp=$(mktemp)
+                $p_verify $p_file >& $p_tmp
+                p_nerr=$(grep "Verification found" $p_tmp | awk '{print $7}')
+                if [ $p_nerr -eq 0 ]; then
+                    echo "      OK. File passes inspection."
+                    rm $p_tmp
+                else
+                    # Move the temporary file and rename it.
+                    p_tmp2=$p_odir'/fverify_error_log_'$p_file
+                    mv $p_tmp $p_tmp2
+                    echo "      Warning: fverify found $p_nerr errors. Check $p_tmp2 for details."
+                fi
+            fi
+        fi
     fi    
     
     # sleep a bit to slow down web queries
