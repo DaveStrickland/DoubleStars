@@ -10,6 +10,7 @@
 # @history 2018-03-13 dks : Initial version coded.
 # @history 2020-03-05 dks : Reformat history and author tags.
 # @history 2020-03-06 dks : Add a .gitignore to $p_data_dir
+# @history 2020-03-21 dks : Option to download main WDS data in text form.
 #-----------------------------------------------------------------------
 #
 
@@ -36,20 +37,36 @@ else
     p_basedir=$DOUBLE_STARS
 fi
 
-p_data_dir=$p_basedir/data
-p_wds_dir=$p_data_dir'/WDS'
-p_wds_fnames=("ReadMe.WDS" \
-    "B_wds.fits.gz" \
-    "B_wds_refs.fits.gz" \
-    "B_wds_notes.fits.gz")
-p_wds_urls=("http://cdsarc.u-strasbg.fr/vizier/ftp/cats/B/wds/ReadMe" \
-    "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B%2Fwds/wds.dat.gz" \
-    "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B%2Fwds/refs.dat.gz" \
-    "http://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B%2Fwds/notes.dat.gz" )
+# Switch on whether to download and convert the text version of the
+# table to work around a bug with the fits version.
+p_do_text=1
 
 # Do we try to fix the header of B_wds.fits.gz?
 # We can disable this by setting p_fix_hdr=0
 p_fix_hdr=0
+
+p_data_dir=$p_basedir/data
+p_wds_dir=$p_data_dir'/WDS'
+
+if [ $p_do_text -eq 0 ]; then
+    p_wds_fnames=("ReadMe.WDS" \
+        "B_wds.fits.gz" \
+        "B_wds_refs.fits.gz" \
+        "B_wds_notes.fits.gz")
+    p_wds_urls=("https://cdsarc.u-strasbg.fr/vizier/ftp/cats/B/wds/ReadMe" \
+        "https://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B/wds/wds.dat.gz" \
+        "https://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B/wds/refs.dat.gz" \
+        "https://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B/wds/notes.dat.gz" )
+else
+    p_wds_fnames=("ReadMe.WDS" \
+        "B_wds.dat.gz" \
+        "B_wds_refs.fits.gz" \
+        "B_wds_notes.fits.gz")
+    p_wds_urls=("https://cdsarc.u-strasbg.fr/vizier/ftp/cats/B/wds/ReadMe" \
+        "https://cdsarc.unistra.fr/ftp/B/wds/___wds.dat.gz" \
+        "https://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B/wds/refs.dat.gz" \
+        "https://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B/wds/notes.dat.gz" )
+fi
 
 # current directory
 p_odir=$(pwd)
@@ -76,6 +93,8 @@ if [ ! -d $p_wds_dir ]; then
 else
     echo "  Using existing directory: $p_wds_dir"
 fi
+
+# Download and process each file in turn.
 cd $p_wds_dir
 ifile=0
 nfiles=${#p_wds_fnames[@]}
