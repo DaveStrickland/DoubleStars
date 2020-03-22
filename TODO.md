@@ -45,7 +45,7 @@
 - [ ] Add examples in docs
 - [ ] Resolve which existing TODOs are OBE.
 - [ ] BUG: B_wds.fits.gz corrupt. CAN"T FIX DIRECTLY. EMAILED CDS.
-- [ ] Write conversion tool to convert text wds data to fits.
+- [X] Write conversion tool to convert text wds data to fits.
 
 ## Version 0.3 - Inferred Physical Properties
 
