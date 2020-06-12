@@ -3,7 +3,14 @@
 # bash download_data.sh
 #
 # Downloads data tables needed for DoubleStars from CDS VizieR
-# in gzipped fits format.
+# in gzipped fits format, and corrects a malformed fits EPOCH keyword 
+# in the main WDS data table.
+#
+# It can also download the main table in ascii format to get around a 
+# fits file corruption problem that appeared in the 2018-2019 timeframe.
+#
+# If the user has HEASOFT installed it will use fverify to verify that 
+# the downloaded fits files are valid.
 #
 # @author Dave Strickland <dave.strickland@gmail.com>
 #
@@ -11,6 +18,10 @@
 # @history 2020-03-05 dks : Reformat history and author tags.
 # @history 2020-03-06 dks : Add a .gitignore to $p_data_dir
 # @history 2020-03-21 dks : Option to download main WDS data in text form.
+# @history 2020-06-12 dks : Minor improvements to header correction section.
+#                           As of 6/12/20 the main WDS fits file is still corrupt.
+#                           Update documentation. Still need to add
+#                           conversion of ascii WDS table to fits.
 #-----------------------------------------------------------------------
 #
 
@@ -42,7 +53,8 @@ fi
 p_do_text=1
 
 # Do we try to fix the header of B_wds.fits.gz?
-# We can disable this by setting p_fix_hdr=0
+# - We can disable this by setting p_fix_hdr=0
+# - Not necessary of p_do_test==1.
 p_fix_hdr=0
 
 p_data_dir=$p_basedir/data
@@ -137,17 +149,26 @@ while [ $ifile -lt $nfiles ]; do
 done
 
 # Can try to fix/update B_wds.fits.gz header.
+# This will only work if there aren't other major problems with the file.
 if [ $p_fix_hdr -eq 1 ]; then
-    if [ -e $p_fmod ]; then
-        echo "NB: Using $p_fmod to fix B_wds.fits.gz EPOCH"
-        python3 $p_fmod ./B_wds.fits.gz EPOCH 2000
+    p_fcheck=./B_wds.fits.gz
+    if [ -e $p_fcheck ]; then
+        if [ -e $p_fmod ]; then
+            echo "NB: Using $p_fmod to attempt to fix B_wds.fits.gz EPOCH"
+            echo "  If there are other problems with the file this is likely to fail."
+            python3 $p_fmod $p_fcheck EPOCH 2000
+        else
+            echo "Warning: $p_fmod not found. Cannot fix $p_fcheck EPOCH"
+        fi
     else
-        echo "Warning: $p_fmod not found. Cannot fix B_wds.fits.gz EPOCH"
+        echo "Warning: Cannot check fits header for non-existant file $p_fcheck"
     fi
 else
-    echo "Not attempting to fix B_wds_fits.gz EPOCH keyword. YMMV."
+    echo "Not attempting to fix $p_fcheck EPOCH keyword. YMMV."
 fi
 cd $p_odir
+
+echo "WDS data download completed at" $(date)
 
 #-----------------------------------------------------------------------
 #
