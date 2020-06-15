@@ -37,7 +37,7 @@ __version__ = "0.2.0"
 
 def command_line_opts():
     # TODO: environment variable for WDS location
-    p_wds='Data/WDS/B_wds.fits.gz'
+    p_wds='data/WDS/B_wds.fits.gz'
     p_filter = 'negative'
     p_magdiff = 6.0
     p_wds_detail_table = 'wds_detail.html'
