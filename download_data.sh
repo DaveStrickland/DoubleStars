@@ -80,9 +80,12 @@ else
         "https://cdsarc.u-strasbg.fr/viz-bin/nph-Cat/fits.gz?B/wds/notes.dat.gz" )
 fi
 
-# current directory
+# Current directory
 p_odir=$(pwd)
+
+# Python scripts we need to run.
 p_fmod=$p_odir/fitsmodhead.py
+p_a2fits=$p_odir/wds_convert.py
 
 if [ ! -d $p_data_dir ]; then
     echo "Creating base data directory: $p_data_dir"
@@ -148,7 +151,8 @@ while [ $ifile -lt $nfiles ]; do
     ((ifile++))
 done
 
-# Can try to fix/update B_wds.fits.gz header.
+# If we downloaded a fits version of the main catalog, we should
+# try to fix/update B_wds.fits.gz header.
 # This will only work if there aren't other major problems with the file.
 if [ $p_fix_hdr -eq 1 ]; then
     p_fcheck=./B_wds.fits.gz
@@ -166,8 +170,33 @@ if [ $p_fix_hdr -eq 1 ]; then
 else
     echo "Not attempting to fix $p_fcheck EPOCH keyword. YMMV."
 fi
-cd $p_odir
 
+# If we downloaded an ascii version of the main catalog we need to
+# convert it to fits format. 
+# Convert B_wds.dat.gz to B_wds.fits.gz using ReadMe.WDS
+if [ $p_do_text -eq 1 ]; then
+    echo "Converting ASCII WDS catalog to fits format."
+    if [ ! -e ReadMe.WDS ]; then
+        echo "  Error: ReadMe.WDS not found in" $(pwd)
+        exit 1
+    fi
+
+    if [ -e B_wds.dat.gz ]; then
+        gunzip -v --force B_wds.dat.gz
+    else
+        echo "  Error: B_wds.dat.gz not found in" $(pwd)
+        exit 1
+    fi
+    
+    python3 $p_a2fits B_wds.dat ReadMe.WDS B_wds.fits
+    if [ $? -ne 0 ]; then
+        echo "  Error: $p_a2fits exited with non-zero return code."
+        exit 2
+    fi
+    gzip -v9 --force B_wds.dat B_wds.fits
+fi
+
+cd $p_odir
 echo "WDS data download completed at" $(date)
 
 #-----------------------------------------------------------------------
